@@ -46,7 +46,7 @@ namespace ImageAnalyzerAI.WebJobV2
                 }
                 else
                 {
-                    await Task.Delay(2000, stoppingToken); // трохи чекаємо, якщо черга пуста
+                    await Task.Delay(2000, stoppingToken);
                 }
             }
         }
@@ -71,7 +71,6 @@ namespace ImageAnalyzerAI.WebJobV2
             var blobName = blobEl.GetString();
             _logger.LogInformation("Processing blob {blob}", blobName);
 
-            // Storage clients
             var blobService = new BlobServiceClient(storageConn);
             var imagesContainer = blobService.GetBlobContainerClient(imagesContainerName);
             var metadataContainer = blobService.GetBlobContainerClient(metadataContainerName);
@@ -86,11 +85,9 @@ namespace ImageAnalyzerAI.WebJobV2
                 return;
             }
 
-            // Download image
             var downloadResp = await blobClient.DownloadStreamingAsync(cancellationToken: ct);
             using var stream = downloadResp.Value.Content;
 
-            // Vision Client
             var visionClient = new ImageAnalysisClient(visionEndpoint, visionKey);
 
             var response = await visionClient.AnalyzeAsync(
@@ -103,7 +100,6 @@ namespace ImageAnalyzerAI.WebJobV2
 
             var description = result.Caption?.Text;
 
-            // Tags
             var tags = result.Tags?.Values.Select(t => t.Name).ToArray();
 
             // Objects
@@ -116,7 +112,6 @@ namespace ImageAnalyzerAI.WebJobV2
                 BoundingBox = o.BoundingBox
             }).ToArray();
 
-            // OCR (Read)
             string? text = null;
             if (result.Read != null)
             {
@@ -135,7 +130,6 @@ namespace ImageAnalyzerAI.WebJobV2
 
             var metaJson = JsonSerializer.Serialize(meta, new JsonSerializerOptions { WriteIndented = true });
 
-            // Upload metadata
             var metaBlobClient = metadataContainer.GetBlobClient(blobName + ".json");
             using var ms = new MemoryStream(Encoding.UTF8.GetBytes(metaJson));
             await metaBlobClient.UploadAsync(ms, overwrite: true, cancellationToken: ct);
