@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<ImageAnalyzerAI.Web.Models.ImageItem>
 @{
     ViewData["Title"] = "Images Browser";
-    var query = (string)ViewData["Query"] ?? "";
+    var query = ViewData["Query"] ?? "";
 }
 
 <!doctype html>
