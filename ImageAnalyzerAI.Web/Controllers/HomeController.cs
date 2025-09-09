@@ -20,6 +20,11 @@ namespace ImageAnalyzerAI.Web.Controllers
             return View(items);
         }
 
+        public  IActionResult Privacy()
+        {
+            return View();
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(ImageUploadDto dto)
